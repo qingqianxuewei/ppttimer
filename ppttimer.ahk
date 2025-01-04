@@ -458,6 +458,9 @@ loadProfile(idx) {
 
   }
   refreshUI()
+  if (isPptTimerOn) {
+    updateCountDownText()
+  }
   if (idx != lastProfile) {
     if (A_ThisMenu != "") {
       currentMenuPos := HasVal(profiles, idx) + 1
