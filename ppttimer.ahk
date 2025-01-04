@@ -6,7 +6,7 @@ DllCall("SetThreadDpiAwarenessContext", "ptr", -4, "ptr")
 global pt_IniFile := A_ScriptDir "\ppttimer.ini"
 global lastProfile, profiles := [], MonitorCount, lastMonitor, manualModeSupressDetection, showOnAllMonitors, isPptTimerOn
 global startKey, stopKey, resetKey, pauseKey, quitKey, moveKey, allMonitorKey
-global opacity, fontface, fontweight, fontsize, textColor, AheadColor, timeoutColor, backgroundColor, bannerWidth, bannerHeight, stopResetsTimer,  pt_Duration, pt_Ahead, pt_PlayFinishSound, pt_FinishSoundFile, pt_PlayWarningSound, pt_WarningSoundFile, sendOnTimeout
+global opacity, fontface, fontweight, fontsize, textColor, AheadColor, timeoutColor, backgroundColor, bannerWidth, bannerHeight, bannerPosition, bannerMargin, stopResetsTimer,  pt_Duration, pt_Ahead, pt_PlayFinishSound, pt_FinishSoundFile, pt_PlayWarningSound, pt_WarningSoundFile, sendOnTimeout
 global currentIndicator := ""
 
 global Guis := []
@@ -255,13 +255,32 @@ refreshUI() {
 
     bannerWidth_scaled := bannerWidth * dpi_scale
     bannerHeight_scaled := bannerHeight * dpi_scale
+    bannerMargin_scaled := bannerMargin * dpi_scale
     indicator_y_scaled := 2.5 * dpi_scale
     indicator_fontsize_scaled := indicator_fontsize * dpi_scale
     indicator_width_scaled := 40
 
     MonitorWidth := MonitorRight - MonitorLeft
-    xposition := MonitorLeft + (MonitorWidth - bannerWidth_scaled)
-
+    MonitorHeight := MonitorBottom - MonitorTop
+    Switch bannerPosition {
+      Case "LT":
+          xposition := MonitorLeft + bannerMargin_scaled
+          yposition := MonitorTop + bannerMargin_scaled
+      Case "RT":
+          xposition := MonitorRight - bannerWidth_scaled - bannerMargin_scaled
+          yposition := MonitorTop + bannerMargin_scaled
+      Case "LB":
+          xposition := MonitorLeft + bannerMargin_scaled
+          yposition := MonitorBottom - bannerHeight_scaled - bannerMargin_scaled
+      Case "RB":
+          xposition := MonitorRight - bannerWidth_scaled - bannerMargin_scaled
+          yposition := MonitorBottom - bannerHeight_scaled - bannerMargin_scaled
+      Default:
+          xposition := MonitorRight - bannerWidth_scaled - bannerMargin_scaled
+          yposition := MonitorTop + bannerMargin_scaled
+    }
+    ; msgbox, % bannerWidth_scaled ", " bannerHeight_scaled
+    ; msgbox, % (MonitorRight - bannerWidth_scaled) ", " xposition ", " yposition
     hCountDown := Guis[A_index]
     hText := Texts[A_index]
     hIndicatorText := Indicators[A_index]
@@ -282,14 +301,14 @@ refreshUI() {
     Gui, Color, %backgroundColor%
 
     if (showOnAllMonitors) {
-      Gui, Show, x%xposition% y%monitorTop% w%bannerWidth_scaled% h%bannerHeight_scaled%
+      Gui, Show, x%xposition% y%yposition% w%bannerWidth_scaled% h%bannerHeight_scaled%
       ; WinShow, % "ahk_id " Guis[A_index]
       Winset, transparent, %opacity%, ahk_id %hCountDown%
     } else {
       if (A_index != lastMonitor) {
         Winhide, % "ahk_id " Guis[A_index]
       } else {
-        Gui, Show, x%xposition% y%monitorTop% w%bannerWidth_scaled% h%bannerHeight_scaled%
+        Gui, Show, x%xposition% y%yposition% w%bannerWidth_scaled% h%bannerHeight_scaled%
         ; WinShow, % "ahk_id " Guis[A_index]
         Winset, transparent, %opacity%, ahk_id %hCountDown%
       }
@@ -441,6 +460,8 @@ loadProfile(idx) {
     InIRead, backgroundColor, %pt_IniFile%, %ProfileSectionName%, backgroundColor, %backgroundColor%
     InIRead, bannerWidth, %pt_IniFile%, %ProfileSectionName%, width, %bannerWidth%
     InIRead, bannerHeight, %pt_IniFile%, %ProfileSectionName%, height, %bannerHeight%
+    InIRead, bannerPosition, %pt_IniFile%, %ProfileSectionName%, position, %bannerPosition%
+    InIRead, bannerMargin, %pt_IniFile%, %ProfileSectionName%, margin, %bannerMargin%
 
     InIRead, pt_Duration, %pt_IniFile%, %ProfileSectionName%, Duration, %pt_Duration%
     InIRead, pt_Ahead, %pt_IniFile%, %ProfileSectionName%, Ahead, %pt_Ahead%
@@ -486,6 +507,9 @@ loadDefaultProfile(){
   InIRead, backgroundColor, %pt_IniFile%, Main, backgroundColor, FFFFAA
   InIRead, bannerWidth, %pt_IniFile%, Main, width, 200
   InIRead, bannerHeight, %pt_IniFile%, Main, height, 60
+  InIRead, bannerPosition, %pt_IniFile%, Main, position, RT
+  InIRead, bannerMargin, %pt_IniFile%, Main, margin, 0
+
 
   InIRead, pt_Duration, %pt_IniFile%, Main, Duration, 300
   InIRead, pt_Ahead, %pt_IniFile%, Main, Ahead, 120
