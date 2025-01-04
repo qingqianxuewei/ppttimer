@@ -12,7 +12,7 @@ global currentIndicator := ""
 global Guis := []
 global Texts := []
 global Indicators := []
-
+global defaultFont := GuiDefaultFont()
 SysGet, MonitorCount, MonitorCount
 Loop, %MonitorCount% {
   Gui, New, +HwndhCountDown
@@ -20,7 +20,7 @@ Loop, %MonitorCount% {
   Gui Add, Text, x0 y0 HwndhDurationText
   Gui Add, Text, x0 y0 HwndhIndicatorText
   GuiControl, +0x200 +center, %hDurationText%
-  GuiControl, +0x200 +center BackgroundTrans, %hIndicatorText%
+  GuiControl, +0x200 BackgroundTrans, %hIndicatorText%
   Winset, ExStyle, +0x20
   Guis.push(hCountDown)
   Texts.push(hDurationText)
@@ -154,7 +154,7 @@ pauseTimer() {
     } else {
       pauseTime := A_TickCount
       SetTimer CountDownTimer, Off
-      currentIndicator := "❚❚"
+      currentIndicator := ";"
     }
     updateIndicator()
   }
@@ -166,7 +166,7 @@ stopTimer() {
   if (stopResetsTimer) {
     resetTimer()
   } else {
-    currentIndicator := "■ "
+    currentIndicator := "<"
     isPptTimerOn := false
     pauseTime := 0
     SetTimer, CountDownTimer, off
@@ -244,11 +244,20 @@ refreshUI() {
     SysGet, Monitor, Monitor, %A_index%
     dpi_scale := GetDpiForMonitor(EnumMonitors()[A_index]) / 96
 
+    if (!dpi_scale) {
+      dpi_scale := 1
+      fontsize_scaled := fontsize * 1.5
+      indicator_fontsize := 9 * 1.5
+    } else {
+      fontsize_scaled := fontsize * dpi_scale
+      indicator_fontsize := 9
+    }
+
     bannerWidth_scaled := bannerWidth * dpi_scale
     bannerHeight_scaled := bannerHeight * dpi_scale
-    fontsize_scaled := fontsize * dpi_scale
-    indicator_fontsize_scaled := 8 * dpi_scale
-    indicator_width_scaled := 22 * dpi_scale
+    indicator_y_scaled := 2.5 * dpi_scale
+    indicator_fontsize_scaled := indicator_fontsize * dpi_scale
+    indicator_width_scaled := 40
 
     MonitorWidth := MonitorRight - MonitorLeft
     xposition := MonitorLeft + (MonitorWidth - bannerWidth_scaled)
@@ -258,11 +267,12 @@ refreshUI() {
     hIndicatorText := Indicators[A_index]
     Gui, %hCountDown%:Default
 
-    GuiControl, Move, %hIndicatorText%, w%indicator_width_scaled%
-    Gui, Font, s%indicator_fontsize_scaled%
+    GuiControl, Move, %hIndicatorText%, w%indicator_width_scaled% y%indicator_y_scaled%
+    Gui, Font, s%indicator_fontsize_scaled%, webdings
     GuiControl, Font, %hIndicatorText%
 
     GuiControl, Move, %hText%, w%bannerWidth_scaled% h%bannerHeight_scaled%
+    Gui, Font, , %defaultFont%
     Gui, Font, %fontweight% s%fontsize_scaled% c%textColor% textcenter, %fontface%
     GuiControl, Font, %hText%
 
@@ -623,4 +633,12 @@ GetDpiForMonitor(hMonitor, Monitor_Dpi_Type := 0) {  ; MDT_EFFECTIVE_DPI = 0 (sh
 }
 GetDpiForWindow(hwnd) {
    return DllCall("User32\GetDpiForWindow", "Ptr", hwnd, "UInt")
+}
+
+GuiDefaultFont() {
+   VarSetCapacity(LF, szLF := 28 + (A_IsUnicode ? 64 : 32), 0) ; LOGFONT structure
+   If DllCall("GetObject", "Ptr", DllCall("GetStockObject", "Int", 17, "Ptr"), "Int", szLF, "Ptr", &LF)
+      Return {Name: StrGet(&LF + 28, 32), Size: Round(Abs(NumGet(LF, 0, "Int")) * (72 / A_ScreenDPI), 1)
+            , Weight: NumGet(LF, 16, "Int"), Quality: NumGet(LF, 26, "UChar")}
+   Return False
 }

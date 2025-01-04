@@ -168,7 +168,7 @@ quitKey=#ESC
 
 ## 编译方法
 * 至 [Autohotkey 主页](https://autohotkey.com) 下载 Autohotkey 并安装。
-* 使用安装后自带的编译打包工具 `Compiler\Ahk2Exe.exe` 编译 ahk 文件。
+* 使用安装后自带的编译打包工具 `Compiler\Ahk2Exe.exe` 使用 Unicode 版本编译 ahk 文件。
 
 ## TODO
 
