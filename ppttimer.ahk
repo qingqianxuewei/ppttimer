@@ -311,11 +311,13 @@ moveToNextMonitor(){
 
 toggleShowOnAllMonitors() {
   showOnAllMonitors := !showOnAllMonitors
-  Menu, MonitorMenu, ToggleCheck, 1&
-  if (showOnAllMonitors) {
-    Menu, MonitorMenu, disable, 2&
-  } else {
-    Menu, MonitorMenu, enable, 2&
+  if (MonitorCount > 1) {
+    Menu, MonitorMenu, ToggleCheck, 1&
+    if (showOnAllMonitors) {
+      Menu, MonitorMenu, disable, 2&
+    } else {
+      Menu, MonitorMenu, enable, 2&
+    }
   }
   refreshUI()
   IniWrite, %showOnAllMonitors%, %pt_IniFile%, status, showOnAllMonitors
