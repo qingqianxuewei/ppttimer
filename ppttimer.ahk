@@ -1,7 +1,7 @@
 #Persistent
 #SingleInstance force
 ;@Ahk2Exe-SetProductName ppttimer
-;@Ahk2Exe-SetVersion 0.5
+;@Ahk2Exe-SetVersion 0.6
 
 DllCall("SetThreadDpiAwarenessContext", "ptr", -4, "ptr")
 
