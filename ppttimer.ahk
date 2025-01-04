@@ -8,7 +8,7 @@ DllCall("SetThreadDpiAwarenessContext", "ptr", -4, "ptr")
 global pt_IniFile := A_ScriptDir "\ppttimer.ini"
 global lastProfile, profiles := [], MonitorCount, lastMonitor, manualModeSupressDetection, showOnAllMonitors, isPptTimerOn
 global startKey, stopKey, resetKey, pauseKey, quitKey, moveKey, allMonitorKey
-global opacity, fontface, fontweight, fontsize, textColor, AheadColor, timeoutColor, backgroundColor, bannerWidth, bannerHeight, bannerPosition, bannerMargin, stopResetsTimer,  pt_Duration, pt_Ahead, pt_PlayFinishSound, pt_FinishSoundFile, pt_PlayWarningSound, pt_WarningSoundFile, sendOnTimeout
+global opacity, fontface, fontweight, fontsize, indicator_fontsize := 12, textColor, AheadColor, timeoutColor, backgroundColor, bannerWidth, bannerHeight, bannerPosition, bannerMargin, stopResetsTimer,  pt_Duration, pt_Ahead, pt_PlayFinishSound, pt_FinishSoundFile, pt_PlayWarningSound, pt_WarningSoundFile, sendOnTimeout
 global currentIndicator := ""
 
 global Guis := []
@@ -247,19 +247,16 @@ refreshUI() {
     dpi_scale := GetDpiForMonitor(EnumMonitors()[A_index]) / 96
 
     if (!dpi_scale) {
-      dpi_scale := 1
-      fontsize_scaled := fontsize * 1.5
-      indicator_fontsize := 9 * 1.5
-    } else {
-      fontsize_scaled := fontsize * dpi_scale
-      indicator_fontsize := 9
+      dpi_scale := A_ScreenDPI / 96
     }
+
+    fontsize_scaled := fontsize * dpi_scale
+    indicator_fontsize_scaled := indicator_fontsize * dpi_scale
 
     bannerWidth_scaled := bannerWidth * dpi_scale
     bannerHeight_scaled := bannerHeight * dpi_scale
     bannerMargin_scaled := bannerMargin * dpi_scale
     indicator_y_scaled := 2.5 * dpi_scale
-    indicator_fontsize_scaled := indicator_fontsize * dpi_scale
     indicator_width_scaled := 40
 
     MonitorWidth := MonitorRight - MonitorLeft
@@ -281,8 +278,6 @@ refreshUI() {
           xposition := MonitorRight - bannerWidth_scaled - bannerMargin_scaled
           yposition := MonitorTop + bannerMargin_scaled
     }
-    ; msgbox, % bannerWidth_scaled ", " bannerHeight_scaled
-    ; msgbox, % (MonitorRight - bannerWidth_scaled) ", " xposition ", " yposition
     hCountDown := Guis[A_index]
     hText := Texts[A_index]
     hIndicatorText := Indicators[A_index]
@@ -489,6 +484,8 @@ loadProfile(idx) {
   pt_Duration := validNumberOrDefault(pt_Duration, 1200)
   pt_Ahead := validNumberOrDefault(pt_Ahead, 120)
 
+  fontsize := fontsize * 96 / A_ScreenDPI
+
   refreshUI()
   if (isPptTimerOn) {
     updateCountDownText()
@@ -508,7 +505,7 @@ loadProfile(idx) {
 loadDefaultProfile(){
   InIRead, fontface, %pt_IniFile%, Main, fontface, Microsoft Yahei
   InIRead, fontweight, %pt_IniFile%, Main, fontweight, bold
-  InIRead, fontsize, %pt_IniFile%, Main, fontsize, 24
+  InIRead, fontsize, %pt_IniFile%, Main, fontsize, 36
   InIRead, textColor, %pt_IniFile%, Main, textcolor, 000000
 
   InIRead, AheadColor, %pt_IniFile%, Main, aheadColor, 9D1000
