@@ -478,6 +478,15 @@ loadProfile(idx) {
     InIRead, sendOnTimeout, %pt_IniFile%, %ProfileSectionName%, sendOnTimeout, %sendOnTimeout%
 
   }
+
+  fontsize := validNumberOrDefault(fontsize, 24)
+  opacity := validNumberOrDefault(opacity, 180)
+  bannerWidth := validNumberOrDefault(bannerWidth, 200)
+  bannerHeight := validNumberOrDefault(bannerHeight, 60)
+  bannerMargin := validNumberOrDefault(bannerMargin, 0)
+  pt_Duration := validNumberOrDefault(pt_Duration, 1200)
+  pt_Ahead := validNumberOrDefault(pt_Ahead, 120)
+
   refreshUI()
   if (isPptTimerOn) {
     updateCountDownText()
@@ -495,7 +504,7 @@ loadProfile(idx) {
 }
 
 loadDefaultProfile(){
-  InIRead, fontface, %pt_IniFile%, Main, fontface, "Microsoft Yahei"
+  InIRead, fontface, %pt_IniFile%, Main, fontface, Microsoft Yahei
   InIRead, fontweight, %pt_IniFile%, Main, fontweight, bold
   InIRead, fontsize, %pt_IniFile%, Main, fontsize, 24
   InIRead, textColor, %pt_IniFile%, Main, textcolor, 000000
@@ -670,4 +679,15 @@ GuiDefaultFont() {
       Return {Name: StrGet(&LF + 28, 32), Size: Round(Abs(NumGet(LF, 0, "Int")) * (72 / A_ScreenDPI), 1)
             , Weight: NumGet(LF, 16, "Int"), Quality: NumGet(LF, 26, "UChar")}
    Return False
+}
+
+validNumberOrDefault(valueToCheck, defaultValue)
+{
+  if valueToCheck is not number
+    return defaultValue
+
+  if (valueToCheck < 0) {
+     return defaultValue
+  }
+  return valueToCheck
 }
